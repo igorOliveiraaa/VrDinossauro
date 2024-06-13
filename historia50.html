@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Aventura Pre Historica</title>
+    <script src="./lib/aframe.min.js"></script>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap');
+      
+      body { 
+        margin: 0; 
+        font-family: 'Comic Neue', cursive;
+      }
+      .fade {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: black;
+        opacity: 0;
+        transition: opacity 1s;
+        pointer-events: none;
+        z-index: 10000;
+      }
+      #narrator {
+        position: fixed;
+        bottom: 0px;
+        left: 20px;
+        width: 150px;
+        height: auto;
+        cursor: pointer;
+        z-index: 10001;
+        transition: transform 0.3s;
+        -webkit-tap-highlight-color: transparent;
+      }
+  
+      @media (max-width: 600px) {
+        #narrator {
+          width: 100px;
+        }
+      }
+      #speech-bubble {
+        position: fixed;
+        bottom: 180px;
+        left: 20px;
+        width: 150px;
+        padding: 10px;
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        z-index: 10002;
+        display: block;
+        font-family: 'Comic Neue', cursive;
+        text-align: center; 
+      }
+      #speech-bubble::after {
+        content: '';
+        position: absolute;
+        bottom: -20px;
+        left: 50%;
+        transform: translateX(-50%); 
+        width: 0;
+        height: 0; 
+        border-left: 10px solid transparent;
+        border-right: 10px solid transparent;
+        border-top: 19px solid #fff;
+      }
+  
+      @media (orientation: portrait) {
+        #speech-bubble {
+          bottom: 120px; 
+        }
+      }
+  
+      @media (max-width: 900px) and (orientation: landscape) {
+        #speech-bubble {
+          bottom: 180px; 
+        }
+      }
+  
+      @media (min-width: 600px) and (max-width: 900px) and (orientation: portrait) {
+        #speech-bubble {
+          bottom: 160px; 
+        }
+      }
+  
+      @media (min-width: 900px) and (orientation: portrait) {
+        #speech-bubble {
+          bottom: 200px; 
+        }
+      }
+  
+      #fullscreen-button {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        padding: 20px 40px;
+        background-color: #007408;
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        font-size: 20px;
+        cursor: pointer;
+        z-index: 10003;
+        font-family: 'Comic Neue', cursive;
+      }
+
+      #close-fullscreen-button {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        padding: 10px 20px;
+        background-color: #f00;
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        font-size: 16px;
+        cursor: pointer;
+        z-index: 10004;
+        display: none;
+        font-family: 'Comic Neue', cursive;
+      }
+
+      @media (max-width: 600px) {
+        #close-fullscreen-button {
+          font-size: 14px;
+          padding: 8px 16px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="fade" class="fade"></div>
+    <a-scene>
+      <a-assets id="assets"></a-assets>
+      <a-sky id="sky" rotation="0 -130 0" src="./img/historia50.png"></a-sky>
+      <a-camera look-controls="reverseTouchDrag: true"></a-camera>
+    </a-scene>
+
+    <img
+      id="narrator"
+      src="./img/narrador/narrador.png"
+      alt="Narrator"
+      onclick="toggleNarration()"
+    />
+    <div id="speech-bubble">Clique aqui para começar a história</div>
+    <audio id="narration-audio" src="./audios/historia50.mp3" controls style="display: none"></audio>
+
+    <button id="fullscreen-button" onclick="enterFullscreen()">Clique aqui para entrar em tela cheia</button>
+    <button id="close-fullscreen-button" onclick="exitFullscreen()">Fechar</button>
+
+    <script>
+      let isNarrating = false;
+
+      function toggleNarration() {
+        const speechBubble = document.getElementById("speech-bubble");
+        const narrationAudio = document.getElementById("narration-audio");
+        if (isNarrating) {
+          narrationAudio.pause();
+          narrationAudio.currentTime = 0;
+          speechBubble.innerText = "Clique aqui para começar a história";
+          isNarrating = false;
+        } else {
+          narrationAudio.play();
+          speechBubble.innerText = "A história começou...";
+          isNarrating = true;
+
+          narrationAudio.onended = () => {
+            speechBubble.innerText = "Clique aqui para começar a história";
+            isNarrating = false;
+          };
+        }
+      }
+
+      function enterFullscreen() {
+        const elem = document.documentElement;
+        if (elem.requestFullscreen) {
+          elem.requestFullscreen();
+        } else if (elem.mozRequestFullScreen) {
+          elem.mozRequestFullScreen();
+        } else if (elem.webkitRequestFullscreen) { 
+          elem.webkitRequestFullscreen();
+        } else if (elem.msRequestFullscreen) { 
+          elem.msRequestFullscreen();
+        }
+
+        const fullscreenButton = document.getElementById("fullscreen-button");
+        const closeFullscreenButton = document.getElementById("close-fullscreen-button");
+        fullscreenButton.style.display = "none";
+        closeFullscreenButton.style.display = "block";
+      }
+
+      function exitFullscreen() {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if (document.mozCancelFullScreen) { 
+          document.mozCancelFullScreen();
+        } else if (document.webkitExitFullscreen) { 
+          document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) { 
+          document.msExitFullscreen();
+        }
+
+        const fullscreenButton = document.getElementById("fullscreen-button");
+        const closeFullscreenButton = document.getElementById("close-fullscreen-button");
+        fullscreenButton.style.display = "block";
+        closeFullscreenButton.style.display = "none";
+      }
+
+      function onFullscreenChange() {
+        const fullscreenButton = document.getElementById("fullscreen-button");
+        const closeFullscreenButton = document.getElementById("close-fullscreen-button");
+        if (document.fullscreenElement) {
+          fullscreenButton.style.display = "none";
+          closeFullscreenButton.style.display = "block";
+        } else {
+          fullscreenButton.style.display = "block";
+          closeFullscreenButton.style.display = "none";
+        }
+      }
+
+      document.addEventListener("fullscreenchange", onFullscreenChange);
+      document.addEventListener("webkitfullscreenchange", onFullscreenChange);
+      document.addEventListener("mozfullscreenchange", onFullscreenChange);
+      document.addEventListener("MSFullscreenChange", onFullscreenChange);
+
+      window.addEventListener('DOMContentLoaded', (event) => {
+        const vrButton = document.querySelector('.a-enter-vr-button');
+        const arButtonHidden = document.querySelector('.a-enter-ar.a-hidden');
+        const arButton = document.querySelector('.a-enter-ar-button');
+        
+        if (vrButton) {
+          vrButton.remove();
+        }
+        if (arButtonHidden) {
+          arButtonHidden.remove();
+        }
+        if (arButton) {
+          arButton.remove();
+        }
+      });
+    </script>
+  </body>
+</html>
